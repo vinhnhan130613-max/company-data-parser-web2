@@ -1,24 +1,33 @@
 import re
 import datetime
 import unidecode
+import time
 from deep_translator import GoogleTranslator
 
 def format_title_case(text: str) -> str:
     """Viết hoa chữ cái đầu mỗi từ."""
     return " ".join([w.capitalize() for w in text.split()])
 
+def safe_translate_batch(texts: list, src="vi", dest="en") -> list:
+    """
+    Dịch bằng translate_batch với cơ chế retry.
+    Thử lại tối đa 3 lần nếu gặp lỗi.
+    """
+    for attempt in range(3):
+        try:
+            return GoogleTranslator(source=src, target=dest).translate_batch(texts)
+        except Exception:
+            time.sleep(2)
+    return texts  # fallback: trả về nguyên văn nếu dịch thất bại
+
 def translate_raw_text(raw_text: str) -> str:
-    """
-    Dịch toàn bộ dữ liệu thô sang tiếng Anh bằng translate_batch.
-    """
-    translated_list = GoogleTranslator(source="vi", target="en").translate_batch([raw_text])
+    """Dịch toàn bộ dữ liệu thô sang tiếng Anh."""
+    translated_list = safe_translate_batch([raw_text])
     return translated_list[0]
 
 def translate_company_name(name: str) -> str:
-    """
-    Chuẩn hóa loại hình công ty sau khi dịch.
-    """
-    translated_list = GoogleTranslator(source="vi", target="en").translate_batch([name])
+    """Dịch tên công ty sang tiếng Anh và chuẩn hóa loại hình công ty."""
+    translated_list = safe_translate_batch([name])
     translated = translated_list[0]
 
     # Chuẩn hóa loại hình công ty
@@ -29,7 +38,7 @@ def translate_company_name(name: str) -> str:
     return translated.strip()
 
 def translate_segment(segment: str) -> str:
-    """Dịch từng thành phần địa chỉ trong Trường 3."""
+    """Dịch từng thành phần địa chỉ trong Trường 3 (quy tắc thủ công)."""
     seg = segment.strip()
     if seg.startswith("Đường"):
         return unidecode.unidecode(seg.replace("Đường", "").strip()) + " St"
@@ -43,7 +52,7 @@ def translate_segment(segment: str) -> str:
         return unidecode.unidecode(seg)
 
 def translate_area(area: str) -> str:
-    """Dịch phường/xã sang tiếng Anh."""
+    """Dịch phường/xã sang tiếng Anh (quy tắc thủ công)."""
     area = area.strip()
     if area.startswith("Phường"):
         name = area.replace("Phường", "").strip()
