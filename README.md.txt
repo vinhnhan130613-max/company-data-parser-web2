@@ -3,8 +3,9 @@
 Ứng dụng Python giúp phân tích **dữ liệu thô** của công ty và tự động đưa vào các trường 1–9.
 
 ## 🚀 Tính năng
+- **Dữ liệu thô (dịch)**: Toàn bộ dữ liệu thô được dịch sang tiếng Anh bằng **deep-translator (Google Translate API)** trước khi phân tích.
 - **Trường 1**: Tên công ty gốc (Title Case).
-- **Trường 2**: Dịch tên công ty sang tiếng Anh bằng **deep-translator (Google Translate API)**.  
+- **Trường 2**: Dịch tên công ty sang tiếng Anh bằng **translate_batch** (deep-translator).  
   Sau khi dịch, hệ thống có bước **hậu xử lý** để chuẩn hóa loại hình công ty:
   - "Co., Ltd." hoặc "Company Limited" → "Co Ltd"
   - "Joint Stock Company" → "JSC"
