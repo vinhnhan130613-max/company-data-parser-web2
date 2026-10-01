@@ -7,14 +7,19 @@ def format_title_case(text: str) -> str:
     """Viết hoa chữ cái đầu mỗi từ."""
     return " ".join([w.capitalize() for w in text.split()])
 
+def translate_raw_text(raw_text: str) -> str:
+    """
+    Dịch toàn bộ dữ liệu thô sang tiếng Anh bằng translate_batch.
+    """
+    translated_list = GoogleTranslator(source="vi", target="en").translate_batch([raw_text])
+    return translated_list[0]
+
 def translate_company_name(name: str) -> str:
     """
-    Dịch tên công ty sang tiếng Anh bằng deep-translator (Google Translate API),
-    sau đó chuẩn hóa loại hình công ty theo quy tắc:
-    - "Co., Ltd." hoặc "Company Limited" -> "Co Ltd"
-    - "Joint Stock Company" -> "JSC"
+    Chuẩn hóa loại hình công ty sau khi dịch.
     """
-    translated = GoogleTranslator(source="vi", target="en").translate(name)
+    translated_list = GoogleTranslator(source="vi", target="en").translate_batch([name])
+    translated = translated_list[0]
 
     # Chuẩn hóa loại hình công ty
     translated = translated.replace("Co., Ltd.", "Co Ltd")
@@ -51,14 +56,17 @@ def translate_area(area: str) -> str:
 def parse_raw_data(text: str) -> dict:
     result = {}
 
-    # Trường 1–2
+    # Bước 1: dịch toàn bộ dữ liệu thô
+    translated_text = translate_raw_text(text)
+    result["Dữ liệu thô (dịch)"] = translated_text
+
+    # Bước 2: phân tích dữ liệu gốc
     match_name = re.search(r"(CÔNG TY[^\n]+|VĂN PHÒNG[^\n]+)", text)
     if match_name:
         raw_name = match_name.group(0).strip()
         result["Trường 1"] = format_title_case(raw_name)
         result["Trường 2"] = translate_company_name(result["Trường 1"])
 
-    # Trường 3–6
     match_addr_tax = re.search(r"Địa chỉ Thuế\s+([^\n]+)", text)
     if match_addr_tax:
         addr_tax = match_addr_tax.group(1).strip()
@@ -76,7 +84,6 @@ def parse_raw_data(text: str) -> dict:
             result["Trường 5"] = area
             result["Trường 6"] = translate_area(area)
 
-    # Trường 7
     match_phone = re.search(r"Điện thoại\s+([0-9\s\.]+)", text)
     if match_phone:
         phone = match_phone.group(1).replace(".", "").replace(" ", "")
@@ -84,7 +91,6 @@ def parse_raw_data(text: str) -> dict:
     else:
         result["Trường 7"] = "N/A"
 
-    # Trường 8–9
     match_rep = re.search(r"Người đại diện\s+([^\n]+)", text)
     if match_rep:
         rep_name = format_title_case(match_rep.group(1).strip())
