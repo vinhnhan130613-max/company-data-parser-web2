@@ -1,7 +1,7 @@
 import re
 import datetime
 import unidecode
-from googletrans import Translator
+from deep_translator import GoogleTranslator
 
 def format_title_case(text: str) -> str:
     """Viết hoa chữ cái đầu mỗi từ."""
@@ -9,14 +9,12 @@ def format_title_case(text: str) -> str:
 
 def translate_company_name(name: str) -> str:
     """
-    Dịch tên công ty sang tiếng Anh bằng Google Translate,
+    Dịch tên công ty sang tiếng Anh bằng deep-translator (Google Translate API),
     sau đó chuẩn hóa loại hình công ty theo quy tắc:
-    - "Co., Ltd." -> "Co Ltd"
-    - "Company Limited" -> "Co Ltd"
+    - "Co., Ltd." hoặc "Company Limited" -> "Co Ltd"
     - "Joint Stock Company" -> "JSC"
     """
-    translator = Translator()
-    translated = translator.translate(name, src="vi", dest="en").text
+    translated = GoogleTranslator(source="vi", target="en").translate(name)
 
     # Chuẩn hóa loại hình công ty
     translated = translated.replace("Co., Ltd.", "Co Ltd")
@@ -64,18 +62,15 @@ def parse_raw_data(text: str) -> dict:
     match_addr_tax = re.search(r"Địa chỉ Thuế\s+([^\n]+)", text)
     if match_addr_tax:
         addr_tax = match_addr_tax.group(1).strip()
-        # tách trước khi gặp Phường/Xã
         parts = re.split(r"(Phường\s+[^\n,]+|Xã\s+[^\n,]+)", addr_tax)
         before_area = parts[0].strip().rstrip(",")
         result["Trường 3"] = before_area
 
-        # dịch từng segment trong Trường 3
         translated_segments = []
         for seg in before_area.split(","):
             translated_segments.append(translate_segment(seg))
         result["Trường 4"] = ", ".join(translated_segments)
 
-        # Trường 5–6: phường/xã
         if len(parts) > 1:
             area = parts[1].strip().rstrip(",")
             result["Trường 5"] = area
