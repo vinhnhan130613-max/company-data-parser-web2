@@ -4,7 +4,8 @@
 
 ## 🚀 Tính năng
 - **Trường 1**: Tên công ty gốc (Title Case).
-- **Trường 2**: Dịch tên công ty sang tiếng Anh bằng **Google Translate**, sau đó có bước **hậu xử lý** để chuẩn hóa loại hình công ty:
+- **Trường 2**: Dịch tên công ty sang tiếng Anh bằng **deep-translator (Google Translate API)**.  
+  Sau khi dịch, hệ thống có bước **hậu xử lý** để chuẩn hóa loại hình công ty:
   - "Co., Ltd." hoặc "Company Limited" → "Co Ltd"
   - "Joint Stock Company" → "JSC"
 - **Trường 3**: Địa chỉ trước khi gặp Phường/Xã.
