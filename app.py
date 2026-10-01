@@ -5,13 +5,18 @@ st.title("Company Data Parser (Raw Data)")
 
 st.write("Dán dữ liệu thô của công ty vào ô dưới đây:")
 
+# Ô nhập dữ liệu thô
 raw_text = st.text_area("Dữ liệu thô")
 
+# Nút phân tích dữ liệu
 if st.button("Phân tích dữ liệu"):
     if raw_text.strip():
-        result = parse_raw_data(raw_text)
-        st.subheader("Kết quả phân tích")
-        for k, v in result.items():
-            st.write(f"**{k}**: {v}")
+        try:
+            result = parse_raw_data(raw_text)
+            st.subheader("Kết quả phân tích")
+            for k, v in result.items():
+                st.write(f"**{k}**: {v}")
+        except Exception as e:
+            st.error(f"Đã xảy ra lỗi khi phân tích dữ liệu: {e}")
     else:
         st.warning("Vui lòng nhập dữ liệu thô trước khi phân tích.")
